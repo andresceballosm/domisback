@@ -7,6 +7,7 @@ from .models import db, bcrypt
 from .views.UserView import user_api as user_blueprint
 from .views.StoreView import store_api as store_blueprint
 from .views.StoretypeView import storetype_api as storetype_blueprint
+from .views.CategoryView import category_api as category_blueprint
 
 
 def create_app(env_name):
@@ -26,12 +27,13 @@ def create_app(env_name):
   app.register_blueprint(user_blueprint, url_prefix='/api/v1/users')
   app.register_blueprint(store_blueprint, url_prefix='/api/v1/stores')
   app.register_blueprint(storetype_blueprint, url_prefix='/api/v1/storetype')
+  app.register_blueprint(category_blueprint, url_prefix='/api/v1/categories')
 
   @app.route('/', methods=['GET'])
   def index():
     """
     example endpoint
     """
-    return 'Congratulations! Your part 2 endpoint is working'
+    return 'Congratulations! Your backend Domis endpoint is working'
 
   return app

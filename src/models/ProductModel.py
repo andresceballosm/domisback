@@ -1,16 +1,18 @@
 from . import db
 import datetime
-from marshmallow import fields,Schema
+from marshmallow import fields, Schema
+from .StoreModel import  StoreModel
 
-class StoretypeModel(db.Model):
+class ProductModel(db.Model):
   """
-  Storetype Model
+  Product Model
   """
 
-  __tablename__ = 'storetype'
+  __tablename__ = 'products'
 
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(128), nullable=False)
+  store_id = db.Column(db.Integer, db.ForeignKey('stores.id'))
   created_at = db.Column(db.DateTime)
   modified_at = db.Column(db.DateTime)
 
@@ -35,18 +37,19 @@ class StoretypeModel(db.Model):
     db.session.commit()
   
   @staticmethod
-  def get_all_stores():
-    return StoretypeModel.query.all()
+  def get_all_products():
+    return ProductModel.query.all()
   
   @staticmethod
-  def get_one_store(id):
-    return StoretypeModel.query.get(id)
+  def get_one_product(id):
+    return ProductModel.query.get(id)
 
   def __repr__(self):
     return '<id {}>'.format(self.id)
 
-class StoretypeSchema(Schema):
+class ProductSchema(Schema):
   id = fields.Int(dump_only=True)
   name = fields.Str(required=True)
+  store_id = fields.Int(dump_only=True)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
