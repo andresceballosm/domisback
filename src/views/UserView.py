@@ -19,7 +19,7 @@ def create():
   # check if user already exist in the db
   user_in_db = UserModel.get_user_by_email(data.get('email'))
   if user_in_db:
-    message = {'error': 'User already exist, please supply another email address'}
+    message = {'error': 'Este email ya esta registrado, por favor ingrese otro.'}
     return custom_response(message, 400)
   
   user = UserModel(data)
@@ -102,12 +102,13 @@ def login():
     return custom_response({'error': 'you need email and password to sign in'}, 400)
   user = UserModel.get_user_by_email(data.get('email'))
   if not user:
-    return custom_response({'error': 'invalid credentials'}, 400)
+    return custom_response({'error': 'Credenciales invalidas'}, 400)
   if not user.check_hash(data.get('password')):
-    return custom_response({'error': 'invalid credentials'}, 400)
+    return custom_response({'error': 'Credenciales invalidas'}, 400)
   ser_data = user_schema.dump(user).data
+  print('ser_data',ser_data)
   token = Auth.generate_token(ser_data.get('id'))
-  return custom_response({'jwt_token': token}, 200)
+  return custom_response({'jwt_token': token, 'user' : ser_data}, 200)
 
   
 

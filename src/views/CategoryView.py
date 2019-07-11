@@ -1,10 +1,21 @@
 from flask import request, g, Blueprint, json, Response
 from ..shared.Authentication import Auth
 from ..models.CategoryModel import CategoryModel, CategorySchema
+from ..models.StoreModel import StoreModel, StoreSchema
 
 category_api = Blueprint('category_api', __name__)
 category_schema = CategorySchema()
+store_schema = StoreSchema()
 
+def validateStore(type):
+  stores = StoreModel.get_all_stores()
+  data = store_schema.dump(stores, many=True).data
+  print('data',data)
+  print('store', data)
+  for store in data:
+    if store['id'] == type:
+        return True
+  
 
 @category_api.route('/create', methods=['POST'])
 @Auth.auth_required
@@ -14,6 +25,9 @@ def create():
   """
   req_data = request.get_json()
   data, error = category_schema.load(req_data)
+  storevalid = validateStore(data['store_id'])
+  if storevalid == None:
+    return custom_response({'error': 'store_id no existe!'}, 404)  
   if error:
     return custom_response(error, 400)
   category = CategoryModel(data)
@@ -52,7 +66,9 @@ def update(category_id):
   if not category:
     return custom_response({'error': 'category not found'}, 404)
   data = category_schema.dump(category).data
-  
+  store_id = data.get('store_id')
+  if store_id != g.user.get('id'):
+    return custom_response({'error': 'Permiso Denegado'}, 400)
   data, error = category_schema.load(req_data, partial=True)
   if error:
     return custom_response(error, 400)
@@ -71,7 +87,10 @@ def delete(category_id):
   if not category:
     return custom_response({'error': 'category not found'}, 404)
   data = category_schema.dump(category).data
-
+  store_id = data.get('store_id')
+  if store_id != g.user.get('id'):
+    return custom_response({'error': 'Permiso Denegado'}, 400)
+  
   category.delete()
   return custom_response({'message': 'deleted'}, 204)
   

@@ -1,7 +1,7 @@
 from . import db
 import datetime
 from marshmallow import fields, Schema
-from .StoreModel import StoreModel
+# from .StoreModel import StoreModel
 
 class CategoryModel(db.Model):
   """
@@ -12,6 +12,7 @@ class CategoryModel(db.Model):
 
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(128), nullable=False)
+  image = db.Column(db.String(128), nullable=False)
   created_at = db.Column(db.DateTime)
   modified_at = db.Column(db.DateTime)
   store_id = db.Column(db.Integer, db.ForeignKey('stores.id'))
@@ -19,6 +20,8 @@ class CategoryModel(db.Model):
 
   def __init__(self, data):
     self.name = data.get('name')
+    self.image = data.get('image')
+    self.store_id = data.get('store_id')
     self.created_at = datetime.datetime.utcnow()
     self.modified_at = datetime.datetime.utcnow()
 
@@ -51,6 +54,7 @@ class CategoryModel(db.Model):
 class CategorySchema(Schema):
   id = fields.Int(dump_only=True)
   name = fields.Str(required=True)
-  store_id = fields.Int(dump_only=True)
+  image = fields.Str(required=True)
+  store_id = fields.Int(required=True)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)

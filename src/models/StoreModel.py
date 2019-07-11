@@ -3,6 +3,7 @@ import datetime
 from marshmallow import fields, Schema
 import uuid
 from .StoretypeModel import StoretypeModel, StoretypeSchema
+from .CategoryModel import CategorySchema
 
 def generate_id():
     return str(uuid.uuid4()).split("-")[-1]
@@ -20,8 +21,7 @@ class StoreModel(db.Model):
   region = db.Column(db.Text, nullable=False)
   city = db.Column(db.Text, nullable=False)
   address = db.Column(db.Text, nullable=False)
-  #storetype = db.Column(db.Integer, nullable=False)
-  storetype = db.Column(db.Integer, db.ForeignKey('storetype.id')),
+  storetype = db.Column(db.Integer, nullable=False)
   latitude = db.Column(db.Float, nullable=False)
   longitude = db.Column(db.Float, nullable=False)
   license = db.Column(db.Boolean, default=False)
@@ -67,6 +67,10 @@ class StoreModel(db.Model):
   @staticmethod
   def get_one_store(id):
     return StoreModel.query.get(id)
+  
+  @staticmethod
+  def get_store_by_storetype(storetype):
+    return StoreModel.query.get(storetype)
 
   def __repr__(self):
     return '<id {}>'.format(self.id)
@@ -78,6 +82,7 @@ class StoreSchema(Schema):
   region = fields.Str(required=True)
   city = fields.Str(required=True)
   address = fields.Str(required=True)
+  storetype = fields.Int(required=True)
   latitude = fields.Float(required=True)
   longitude = fields.Float(required=True)
   license = fields.Boolean(required=False)
@@ -85,4 +90,4 @@ class StoreSchema(Schema):
   owner_id = fields.Int(required=True)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
-  storetype = fields.Int(dump_only=True)
+  categories = fields.Nested(CategorySchema, many=True)

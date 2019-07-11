@@ -25,9 +25,7 @@ def create():
   req_data = request.get_json()
   req_data['owner_id'] = g.user.get('id')
   data, error = store_schema.load(req_data)
-  # print(data['storetype'])
   storetypevalid = validateStoretype(data['storetype'])
-  print('is valid',storetypevalid)
   if storetypevalid == None:
     return custom_response({'error': 'storetype no existe!'}, 404)  
    
@@ -54,7 +52,18 @@ def get_one(store_id):
   """
   store = StoreModel.get_one_store(store_id)
   if not store:
-    return custom_response({'error': 'post not found'}, 404)
+    return custom_response({'error': 'No se encontraron negocios'}, 404)
+  data = store_schema.dump(store).data
+  return custom_response(data, 200)
+
+@store_api.route('storetype/<int:storetype>', methods=['GET'])
+def get_one_storetype(storetype):
+  """
+  Get A Store by Storetype
+  """
+  store = StoreModel.get_store_by_storetype(storetype)
+  if not store:
+    return custom_response({'error': 'No se encontraron negocios'}, 404)
   data = store_schema.dump(store).data
   return custom_response(data, 200)
 

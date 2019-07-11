@@ -4,38 +4,36 @@ from marshmallow import fields, Schema
 from .StoreModel import  StoreModel
 from .CategoryModel import CategoryModel
 
-class ProductModel(db.Model):
+class OrderModel(db.Model):
   """
-  Product Model
+  Order Model
   """
 
-  __tablename__ = 'products'
+  __tablename__ = 'orders'
 
   id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(128), nullable=False)
-  price = db.Column(db.Float, nullable=False)
-  money = db.Column(db.String(128), nullable=False)
-  brand = db.Column(db.String(128), nullable=False)
-  quantity = db.Column(db.Float, nullable=False)
-  unity = db.Column(db.String(128), nullable=False)
-  description = db.Column(db.String(128), nullable=False)
+  order_number = db.Column(db.Integer, nullable=False)
+  customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))
   store_id = db.Column(db.Integer, db.ForeignKey('stores.id'))
   category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
-  image = db.Column(db.String(128), nullable=False)
+  product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
+  price = db.Column(db.Float, nullable=False )
+  quantity = db.Column(db.Float, nullable=False)
+  total = db.Column(db.Float, nullable=False)
+  status = db.Column(db.String, nullable=False)
   created_at = db.Column(db.DateTime)
   modified_at = db.Column(db.DateTime)
 
   def __init__(self, data):
-    self.name = data.get('name')
-    self.money = data.get('money')
-    self.brand = data.get('brand')
-    self.price = data.get('price')
-    self.quantity = data.get('quantity')
-    self.unity = data.get('unity')
-    self.description = data.get('description')
+    self.order_number = data.get('order_number')
+    self.customer_id = data.get('customer_id')
     self.store_id = data.get('store_id')
     self.category_id = data.get('category_id')
-    self.image = data.get('image')
+    self.product_id = data.get('product_id')
+    self.price = data.get('price')
+    self.quantity = data.get('quantity')
+    self.total = data.get('total')
+    self.status = data.get('status')
     self.created_at = datetime.datetime.utcnow()
     self.modified_at = datetime.datetime.utcnow()
 
@@ -55,27 +53,26 @@ class ProductModel(db.Model):
     db.session.commit()
   
   @staticmethod
-  def get_all_products():
-    return ProductModel.query.all()
+  def get_all_orders():
+    return OrderModel.query.all()
   
   @staticmethod
-  def get_one_product(id):
-    return ProductModel.query.get(id)
+  def get_one_order(id):
+    return OrderModel.query.get(id)
 
   def __repr__(self):
     return '<id {}>'.format(self.id)
 
-class ProductSchema(Schema):
+class OrderSchema(Schema):
   id = fields.Int(dump_only=True)
-  name = fields.Str(required=True)
-  money = fields.Str(required=True)
-  brand = fields.Str(required=True)
-  price = fields.Float(required=True)
-  quantity = fields.Float(required=True)
-  unity = fields.String(required=True)
-  description = fields.Str(required=True)
+  order_number = fields.Int(required=True)
+  customer_id = fields.Int(required=True)
   store_id = fields.Int(required=True)
   category_id = fields.Int(required=True)
-  image = fields.Str(required=True)
+  product_id = fields.Int(required=True)
+  price = fields.Float(required=True)
+  quantity = fields.Float(required=True)
+  total = fields.Float(required=True)
+  status = fields.Str(required=True)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
