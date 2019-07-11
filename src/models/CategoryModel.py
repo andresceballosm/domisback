@@ -43,6 +43,11 @@ class CategoryModel(db.Model):
   @staticmethod
   def get_all_categories():
     return CategoryModel.query.all()
+
+  @staticmethod
+  def get_categories_by_store(store_id):
+    return CategoryModel.query.filter(CategoryModel.store_id == store_id).all()
+
   
   @staticmethod
   def get_one_category(id):

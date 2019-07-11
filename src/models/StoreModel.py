@@ -69,8 +69,9 @@ class StoreModel(db.Model):
     return StoreModel.query.get(id)
   
   @staticmethod
-  def get_store_by_storetype(storetype):
-    return StoreModel.query.get(storetype)
+  def get_store_by_storetype(storetype, city):
+    return StoreModel.query.filter(StoreModel.storetype == storetype, StoreModel.city == city).all()
+
 
   def __repr__(self):
     return '<id {}>'.format(self.id)

@@ -2,6 +2,7 @@ from flask import request, g, Blueprint, json, Response
 from ..shared.Authentication import Auth
 from ..models.StoreModel import StoreModel, StoreSchema
 from ..models.StoretypeModel import StoretypeModel, StoretypeSchema
+from ..utils.distance import DistanceModel
 
 store_api = Blueprint('store_api', __name__)
 store_schema = StoreSchema()
@@ -56,15 +57,56 @@ def get_one(store_id):
   data = store_schema.dump(store).data
   return custom_response(data, 200)
 
-@store_api.route('storetype/<int:storetype>', methods=['GET'])
-def get_one_storetype(storetype):
+@store_api.route('storetype/<int:storetype>/<city>', methods=['GET'])
+def get_all_storetype(storetype,city):
   """
-  Get A Store by Storetype
+  Get A Store by Storetype and city
   """
-  store = StoreModel.get_store_by_storetype(storetype)
-  if not store:
+  lat=4.726885
+  lng= -74.048243
+  storesData = [
+    {
+        "active": 'false',
+        "address": "Calle 159",
+        "city": "Bogota",
+        "country": "Colombia",
+        "created_at": "2019-07-11T16:29:28.137590+00:00",
+        "id": 1,
+        "latitude": 4.735909,
+        "license": 'false',
+        "longitude": -74.032106,
+        "modified_at": "2019-07-11T16:29:28.137608+00:00",
+        "name": "Cigarreria Madgala",
+        "owner_id": 2,
+        "region": "Cundinamarca",
+        "storetype": 1
+    },
+    {
+        "active": 'false',
+        "address": "Calle 161",
+        "city": "Bogota",
+        "country": "Colombia",
+        "created_at": "2019-07-11T18:55:55.393171+00:00",
+        "id": 2,
+        "latitude": 4.740186, 
+        "license": 'false',
+        "longitude": -74.057041,
+        "modified_at": "2019-07-11T18:55:55.393189+00:00",
+        "name": "Cigarreria La Quinta",
+        "owner_id": 2,
+        "region": "Cundinamarca",
+        "storetype": 1
+    }
+  ]
+
+  for stor in storesData:
+    distance = DistanceModel.distance_cal(lat,lng,stor['latitude'],stor['longitude'])
+    print('distance ==', distance)
+
+  stores = StoreModel.get_store_by_storetype(storetype,city)
+  if not stores:
     return custom_response({'error': 'No se encontraron negocios'}, 404)
-  data = store_schema.dump(store).data
+  data = store_schema.dump(stores, many=True).data
   return custom_response(data, 200)
 
 @store_api.route('/<int:store_id>', methods=['PUT'])
