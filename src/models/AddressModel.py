@@ -5,19 +5,15 @@ from .StoreModel import  StoreModel
 from .CategoryModel import CategoryModel
 from .OrderModel import OrderModel, OrderSchema
 
-class CustomerModel(db.Model):
+class AddressModel(db.Model):
   """
-  Customer Model
+  Address Model
   """
 
-  __tablename__ = 'customers'
+  __tablename__ = 'addresses'
 
   id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(128), nullable=False)
-  country = db.Column(db.String(128), nullable=False)
-  region = db.Column(db.String(128), nullable=False)
-  city = db.Column(db.String(128), nullable=False)
-  region = db.Column(db.String(128), nullable=False)
+  type_address = db.Column(db.String(128), nullable=False)  # CASA / OFICINA / APARTAMENTO
   address = db.Column(db.String(128), nullable=False)
   phone = db.Column(db.Integer, nullable=False)
   user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -25,10 +21,7 @@ class CustomerModel(db.Model):
   modified_at = db.Column(db.DateTime)
 
   def __init__(self, data):
-    self.name = data.get('name')
-    self.country = data.get('country')
-    self.region = data.get('region')
-    self.city = data.get('city')
+    self.type_address = data.get('type_address')
     self.address = data.get('address')
     self.phone = data.get('phone')
     self.user = data.get('user')
@@ -51,25 +44,22 @@ class CustomerModel(db.Model):
     db.session.commit()
   
   @staticmethod
-  def get_all_customers():
-    return CustomerModel.query.all()
+  def get_all_addresses():
+    return AddressModel.query.all()
   
   @staticmethod
-  def get_one_customer(id):
-    return CustomerModel.query.get(id)
+  def get_one_address(id):
+    return AddressModel.query.get(id)
 
   def __repr__(self):
     return '<id {}>'.format(self.id)
 
-class CustomerSchema(Schema):
+class AddressSchema(Schema):
   id = fields.Int(dump_only=True)
-  name = fields.Str(required=True)
-  country = fields.Str(required=True)
-  region = fields.Str(required=True)
-  city = fields.Str(required=True)
+  type_address = fields.Str(required=True)
   address = fields.Str(required=True)
   phone = fields.Int(required=True)
   user = fields.Int(required=True)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
-  orders = fields.Nested(OrderSchema, many=True)
+  #orders = fields.Nested(OrderSchema, many=True)

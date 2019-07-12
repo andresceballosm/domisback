@@ -1,11 +1,13 @@
 from flask import request, g, Blueprint, json, Response
 from ..shared.Authentication import Auth
+from ..models.UserModel import UserModel, UserSchema
 from ..models.StoreModel import StoreModel, StoreSchema
 from ..models.StoretypeModel import StoretypeModel, StoretypeSchema
 from ..utils.distance import DistanceModel
 
 store_api = Blueprint('store_api', __name__)
 store_schema = StoreSchema()
+user_schema = UserSchema()
 storetype_schema = StoretypeSchema()
 
 def validateStoretype(type):
@@ -15,7 +17,6 @@ def validateStoretype(type):
   for storetype in data:
     if storetype['id'] == type:
         return True
-  
       
 @store_api.route('/create', methods=['POST'])
 @Auth.auth_required
@@ -25,6 +26,12 @@ def create():
   """
   req_data = request.get_json()
   req_data['owner_id'] = g.user.get('id')
+  userAuth = UserModel.get_one_user(req_data['owner_id'])
+  user = user_schema.dump(userAuth).data
+
+  if user['type_user'] == 'client':
+    return custom_response({'error': 'No tiene los privilegios de usuario para crear un negocio!'}, 401)  
+
   data, error = store_schema.load(req_data)
   storetypevalid = validateStoretype(data['storetype'])
   if storetypevalid == None:
@@ -53,61 +60,38 @@ def get_one(store_id):
   """
   store = StoreModel.get_one_store(store_id)
   if not store:
-    return custom_response({'error': 'No se encontraron negocios'}, 404)
+    return custom_response({'info': 'No se encontraron negocios'}, 204)
   data = store_schema.dump(store).data
   return custom_response(data, 200)
 
-@store_api.route('storetype/<int:storetype>/<city>', methods=['GET'])
-def get_all_storetype(storetype,city):
+@store_api.route('/locations', methods=['POST'])
+def get_all_storetype():
   """
   Get A Store by Storetype and city
   """
-  lat=4.726885
-  lng= -74.048243
-  storesData = [
-    {
-        "active": 'false',
-        "address": "Calle 159",
-        "city": "Bogota",
-        "country": "Colombia",
-        "created_at": "2019-07-11T16:29:28.137590+00:00",
-        "id": 1,
-        "latitude": 4.735909,
-        "license": 'false',
-        "longitude": -74.032106,
-        "modified_at": "2019-07-11T16:29:28.137608+00:00",
-        "name": "Cigarreria Madgala",
-        "owner_id": 2,
-        "region": "Cundinamarca",
-        "storetype": 1
-    },
-    {
-        "active": 'false',
-        "address": "Calle 161",
-        "city": "Bogota",
-        "country": "Colombia",
-        "created_at": "2019-07-11T18:55:55.393171+00:00",
-        "id": 2,
-        "latitude": 4.740186, 
-        "license": 'false',
-        "longitude": -74.057041,
-        "modified_at": "2019-07-11T18:55:55.393189+00:00",
-        "name": "Cigarreria La Quinta",
-        "owner_id": 2,
-        "region": "Cundinamarca",
-        "storetype": 1
-    }
-  ]
+  req_data = request.get_json()
+  storetype = req_data['storetype']
+  city = req_data['city']
+  location = req_data['location']
+  lat = location['latitude']
+  lng = location['longitude']
+  stores= []
+  allStores = StoreModel.get_store_by_storetype(storetype,city)
+  data = store_schema.dump(allStores, many=True).data
 
-  for stor in storesData:
-    distance = DistanceModel.distance_cal(lat,lng,stor['latitude'],stor['longitude'])
-    print('distance ==', distance)
+  if not allStores:
+    return custom_response({'info': 'No se encontraron negocios'}, 204)
 
-  stores = StoreModel.get_store_by_storetype(storetype,city)
+  for store in data:
+    print('store[license]',store['license'])
+    distance = DistanceModel.distance_cal(lat,lng,store['latitude'],store['longitude'])
+    if store['license'] != False and store['active'] != False and distance <= store['perimeter']:
+      stores.append(store)
+
   if not stores:
-    return custom_response({'error': 'No se encontraron negocios'}, 404)
-  data = store_schema.dump(stores, many=True).data
-  return custom_response(data, 200)
+    return custom_response({'info': 'No se encontraron negocios en el perímetro.'}, 204)
+  
+  return custom_response(stores, 200)
 
 @store_api.route('/<int:store_id>', methods=['PUT'])
 @Auth.auth_required
@@ -119,9 +103,15 @@ def update(store_id):
   store = StoreModel.get_one_store(store_id)
   if not store:
     return custom_response({'error': 'store not found'}, 404)
+
   data = store_schema.dump(store).data
-  if data.get('owner_id') != g.user.get('id'):
-    return custom_response({'error': 'permission denied'}, 400)
+
+  #Trae datos del usuario para validar si es admin
+  userData = UserModel.get_one_user(g.user.get('id'))
+  user = user_schema.dump(userData).data
+
+  if data.get('owner_id') != g.user.get('id') and user['type_user'] != 'admin':
+    return custom_response({'error': 'Permiso denegado'}, 401)
   
   data, error = store_schema.load(req_data, partial=True)
   if error:
@@ -141,8 +131,13 @@ def delete(store_id):
   if not store:
     return custom_response({'error': 'store not found'}, 404)
   data = store_schema.dump(store).data
-  if data.get('owner_id') != g.user.get('id'):
-    return custom_response({'error': 'permission denied'}, 400)
+
+  #Trae datos del usuario para validar si es admin
+  userData = UserModel.get_one_user(g.user.get('id'))
+  user = user_schema.dump(userData).data
+
+  if data.get('owner_id') != g.user.get('id') and user['type_user'] != 'admin':
+    return custom_response({'error': 'Permiso denegado'}, 401)
 
   store.delete()
   return custom_response({'message': 'deleted'}, 204)

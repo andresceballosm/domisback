@@ -5,7 +5,7 @@ from .models import db, bcrypt
 
 # import user_api blueprint
 from .views.UserView import user_api as user_blueprint
-from .views.CustomerView import customer_api as customer_blueprint
+from .views.AddressView import address_api as address_blueprint
 from .views.StoreView import store_api as store_blueprint
 from .views.StoretypeView import storetype_api as storetype_blueprint
 from .views.CategoryView import category_api as category_blueprint
@@ -27,7 +27,7 @@ def create_app(env_name):
   db.init_app(app)
 
   app.register_blueprint(user_blueprint, url_prefix='/api/v1/users')
-  app.register_blueprint(customer_blueprint, url_prefix='/api/v1/customers')
+  app.register_blueprint(address_blueprint, url_prefix='/api/v1/address')
   app.register_blueprint(store_blueprint, url_prefix='/api/v1/stores')
   app.register_blueprint(storetype_blueprint, url_prefix='/api/v1/storetype')
   app.register_blueprint(category_blueprint, url_prefix='/api/v1/categories')

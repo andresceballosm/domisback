@@ -13,7 +13,7 @@ class OrderModel(db.Model):
 
   id = db.Column(db.Integer, primary_key=True)
   order_number = db.Column(db.Integer, nullable=False)
-  customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))
+  user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
   store_id = db.Column(db.Integer, db.ForeignKey('stores.id'))
   category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
   product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
@@ -26,7 +26,7 @@ class OrderModel(db.Model):
 
   def __init__(self, data):
     self.order_number = data.get('order_number')
-    self.customer_id = data.get('customer_id')
+    self.user = data.get('user')
     self.store_id = data.get('store_id')
     self.category_id = data.get('category_id')
     self.product_id = data.get('product_id')
@@ -55,6 +55,10 @@ class OrderModel(db.Model):
   @staticmethod
   def get_all_orders():
     return OrderModel.query.all()
+
+  @staticmethod
+  def get_order(order_number):
+    return OrderModel.query.filter(OrderModel.order_number == order_number).all()
   
   @staticmethod
   def get_one_order(id):
@@ -66,7 +70,7 @@ class OrderModel(db.Model):
 class OrderSchema(Schema):
   id = fields.Int(dump_only=True)
   order_number = fields.Int(required=True)
-  customer_id = fields.Int(required=True)
+  user = fields.Int(required=True)
   store_id = fields.Int(required=True)
   category_id = fields.Int(required=True)
   product_id = fields.Int(required=True)

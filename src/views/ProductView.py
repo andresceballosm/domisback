@@ -53,6 +53,17 @@ def get_all():
   data = product_schema.dump(products, many=True).data
   return custom_response(data, 200)
 
+@product_api.route('/category/<int:category_id>', methods=['GET'])
+def get_by_category(category_id):
+  """
+  Get All Products by category
+  """
+  products = ProductModel.get_products_by_category(category_id)
+  if not products:
+    return custom_response({'info': 'No se encontraron productos para esta categoria'}, 404)
+  data = product_schema.dump(products, many=True).data
+  return custom_response(data, 200)
+
 @product_api.route('/<int:product_id>', methods=['GET'])
 def get_one(product_id):
   """
@@ -60,7 +71,7 @@ def get_one(product_id):
   """
   product = ProductModel.get_one_product(product_id)
   if not product:
-    return custom_response({'error': 'product not found'}, 404)
+    return custom_response({'error': 'Producto no encontrado'}, 404)
   data = product_schema.dump(product).data
   return custom_response(data, 200)
 
@@ -73,11 +84,11 @@ def update(product_id):
   req_data = request.get_json()
   product = ProductModel.get_one_product(product_id)
   if not product:
-    return custom_response({'error': 'product not found'}, 404)
+    return custom_response({'error': 'Producto no encontrado'}, 404)
   data = product_schema.dump(product).data
   store_id = data.get('store_id')
   if store_id != g.user.get('id'):
-    return custom_response({'error': 'Permiso Denegado'}, 400)
+    return custom_response({'error': 'Permiso Denegado'}, 401)
   data, error = product_schema.load(req_data, partial=True)
   if error:
     return custom_response(error, 400)
@@ -94,11 +105,11 @@ def delete(product_id):
   """
   product = ProductModel.get_one_product(product_id)
   if not product:
-    return custom_response({'error': 'product not found'}, 404)
+    return custom_response({'error': 'Producto no encontrado'}, 404)
   data = product_schema.dump(product).data
   store_id = data.get('store_id')
   if store_id != g.user.get('id'):
-    return custom_response({'error': 'Permiso Denegado'}, 400)
+    return custom_response({'error': 'Permiso Denegado'}, 401)
   
   product.delete()
   return custom_response({'message': 'deleted'}, 204)

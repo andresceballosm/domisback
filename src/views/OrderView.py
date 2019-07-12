@@ -2,13 +2,13 @@ from flask import request, g, Blueprint, json, Response
 from ..shared.Authentication import Auth
 from ..models.OrderModel import OrderModel, OrderSchema
 from ..models.StoreModel import StoreModel, StoreSchema
-from ..models.CustomerModel import CustomerModel, CustomerSchema
+from ..models.UserModel import UserModel, UserSchema
 from ..models.CategoryModel import CategoryModel, CategorySchema
 from ..models.ProductModel import ProductModel, ProductSchema
 
 order_api = Blueprint('order_api', __name__)
 order_schema = OrderSchema()
-customer_schema = CustomerSchema()
+user_schema = UserSchema()
 store_schema = StoreSchema()
 category_schema = CategorySchema()
 product_schema = ProductSchema()
@@ -37,9 +37,9 @@ def validateProduct(type):
 def validateprice(type, price):
   products = ProductModel.get_all_products()
   data = product_schema.dump(products, many=True).data
-  for customer in data:
-    if customer['id'] == type:
-      if customer['price'] == price:
+  for product in data:
+    if product['id'] == type:
+      if product['price'] == price:
         return True
 
 @order_api.route('/create', methods=['POST'])
@@ -49,7 +49,6 @@ def create():
   Create order Function
   """
   req_data = request.get_json()
-  req_data['customer_id'] = g.user.get('id')
   data, error = order_schema.load(req_data)
   storevalid = validateStore(data['store_id'])
   categoryvalid = validateCategory(data['category_id'])
@@ -77,6 +76,15 @@ def get_all():
   Get All orders
   """
   orders = OrderModel.get_all_orders()
+  data = order_schema.dump(orders, many=True).data
+  return custom_response(data, 200)
+
+@order_api.route('/order/<int:order_number>', methods=['GET'])
+def get_order(order_number):
+  """
+  Get order by order number
+  """
+  orders = OrderModel.get_order(order_number)
   data = order_schema.dump(orders, many=True).data
   return custom_response(data, 200)
 
@@ -124,8 +132,6 @@ def delete(order_id):
     return custom_response({'error': 'order not found'}, 404)
   data = order_schema.dump(order).data
   store_id = data.get('store')
-  print('store_id',store_id)
-  print('user',g.user.get('id'))
   if store_id != g.user.get('id'):
     return custom_response({'error': 'Permiso Denegado'}, 400)
   

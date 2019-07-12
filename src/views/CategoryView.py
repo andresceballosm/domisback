@@ -62,7 +62,7 @@ def get_one(category_id):
   """
   category = CategoryModel.get_one_category(category_id)
   if not category:
-    return custom_response({'error': 'category not found'}, 404)
+    return custom_response({'error': 'Categoria no encontrada.'}, 404)
   data = category_schema.dump(category).data
   return custom_response(data, 200)
 
@@ -75,11 +75,11 @@ def update(category_id):
   req_data = request.get_json()
   category = CategoryModel.get_one_category(category_id)
   if not category:
-    return custom_response({'error': 'category not found'}, 404)
+    return custom_response({'error': 'Categoria no encontrada.'}, 404)
   data = category_schema.dump(category).data
   store_id = data.get('store_id')
   if store_id != g.user.get('id'):
-    return custom_response({'error': 'Permiso Denegado'}, 400)
+    return custom_response({'error': 'Permiso Denegado'}, 401)
   data, error = category_schema.load(req_data, partial=True)
   if error:
     return custom_response(error, 400)
@@ -96,11 +96,11 @@ def delete(category_id):
   """
   category = CategoryModel.get_one_category(category_id)
   if not category:
-    return custom_response({'error': 'category not found'}, 404)
+    return custom_response({'error': 'Categoria no encontrada.'}, 404)
   data = category_schema.dump(category).data
   store_id = data.get('store_id')
   if store_id != g.user.get('id'):
-    return custom_response({'error': 'Permiso Denegado'}, 400)
+    return custom_response({'error': 'Permiso Denegado'}, 401)
   
   category.delete()
   return custom_response({'message': 'deleted'}, 204)

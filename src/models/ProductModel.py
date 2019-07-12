@@ -57,6 +57,10 @@ class ProductModel(db.Model):
   @staticmethod
   def get_all_products():
     return ProductModel.query.all()
+
+  @staticmethod
+  def get_products_by_category(category_id):
+    return ProductModel.query.filter(ProductModel.category_id == category_id).all()
   
   @staticmethod
   def get_one_product(id):
