@@ -11,6 +11,7 @@ from .views.StoretypeView import storetype_api as storetype_blueprint
 from .views.CategoryView import category_api as category_blueprint
 from .views.ProductView import product_api as product_blueprint
 from .views.OrderView import order_api as order_blueprint
+from .views.OrderDetailsView import orderDetails_api as orderDetails_blueprint
 
 def create_app(env_name):
   """
@@ -33,6 +34,7 @@ def create_app(env_name):
   app.register_blueprint(category_blueprint, url_prefix='/api/v1/categories')
   app.register_blueprint(product_blueprint, url_prefix='/api/v1/products')
   app.register_blueprint(order_blueprint, url_prefix='/api/v1/orders')
+  app.register_blueprint(orderDetails_blueprint, url_prefix='/api/v1/orderdetails')
 
   @app.route('/', methods=['GET'])
   def index():

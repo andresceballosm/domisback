@@ -19,28 +19,6 @@ def validateStore(type):
   for store in data:
     if store['id'] == type:
         return True
-  
-def validateCategory(type):
-  categories = CategoryModel.get_all_categories()
-  data = category_schema.dump(categories, many=True).data
-  for category in data:
-    if category['id'] == type:
-        return True
-    
-def validateProduct(type):
-  products = ProductModel.get_all_products()
-  data = product_schema.dump(products, many=True).data
-  for product in data:
-    if product['id'] == type:
-        return True
-      
-def validateprice(type, price):
-  products = ProductModel.get_all_products()
-  data = product_schema.dump(products, many=True).data
-  for product in data:
-    if product['id'] == type:
-      if product['price'] == price:
-        return True
 
 @order_api.route('/create', methods=['POST'])
 @Auth.auth_required
@@ -49,20 +27,13 @@ def create():
   Create order Function
   """
   req_data = request.get_json()
+  req_data['user'] = g.user.get('id')
   data, error = order_schema.load(req_data)
   storevalid = validateStore(data['store_id'])
-  categoryvalid = validateCategory(data['category_id'])
-  productvalid = validateProduct(data['product_id'])
-  productpricevalid = validateprice(data['product_id'], data['price'])
-  print(data)
+
   if storevalid == None:
     return custom_response({'error': 'store_id no existe!'}, 404)  
-  if categoryvalid == None:
-    return custom_response({'error': 'category_id no existe!'}, 404)  
-  if productvalid == None:
-    return custom_response({'error': 'product_id no existe!'}, 404) 
-  if productpricevalid == None:
-        return custom_response({'error': 'el precio del producto no es correcto!'}, 404) 
+
   if error:
     return custom_response(error, 400)
   order = OrderModel(data)
@@ -76,15 +47,6 @@ def get_all():
   Get All orders
   """
   orders = OrderModel.get_all_orders()
-  data = order_schema.dump(orders, many=True).data
-  return custom_response(data, 200)
-
-@order_api.route('/order/<int:order_number>', methods=['GET'])
-def get_order(order_number):
-  """
-  Get order by order number
-  """
-  orders = OrderModel.get_order(order_number)
   data = order_schema.dump(orders, many=True).data
   return custom_response(data, 200)
 
@@ -110,15 +72,11 @@ def update(order_id):
   if not order:
     return custom_response({'error': 'order not found'}, 404)
   data = order_schema.dump(order).data
-  store_id = data.get('store')
-  if store_id != g.user.get('id'):
-    return custom_response({'error': 'Permiso Denegado'}, 400)
   data, error = order_schema.load(req_data, partial=True)
   if error:
     return custom_response(error, 400)
+
   order.update(data)
-  
-  data = order_schema.dump(order).data
   return custom_response(data, 200)
 
 @order_api.route('/delete/<int:order_id>', methods=['DELETE'])
@@ -131,9 +89,6 @@ def delete(order_id):
   if not order:
     return custom_response({'error': 'order not found'}, 404)
   data = order_schema.dump(order).data
-  store_id = data.get('store')
-  if store_id != g.user.get('id'):
-    return custom_response({'error': 'Permiso Denegado'}, 400)
   
   order.delete()
   return custom_response({'message': 'deleted'}, 204)

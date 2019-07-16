@@ -83,7 +83,6 @@ def get_all_storetype():
     return custom_response({'info': 'No se encontraron negocios'}, 204)
 
   for store in data:
-    print('store[license]',store['license'])
     distance = DistanceModel.distance_cal(lat,lng,store['latitude'],store['longitude'])
     if store['license'] != False and store['active'] != False and distance <= store['perimeter']:
       stores.append(store)
