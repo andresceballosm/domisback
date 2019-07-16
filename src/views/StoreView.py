@@ -74,10 +74,12 @@ def get_all_storetype():
   city = req_data['city']
   location = req_data['location']
   lat = location['latitude']
+  print('lat',lat)
   lng = location['longitude']
   stores= []
   allStores = StoreModel.get_store_by_storetype(storetype,city)
   data = store_schema.dump(allStores, many=True).data
+  print('all stores', data)
 
   if not allStores:
     return custom_response({'info': 'No se encontraron negocios'}, 204)
@@ -87,8 +89,10 @@ def get_all_storetype():
     if store['license'] != False and store['active'] != False and distance <= store['perimeter']:
       stores.append(store)
 
+  print('stores', stores)
   if not stores:
-    return custom_response({'info': 'No se encontraron negocios en el perímetro.'}, 204)
+    print('entrooo')
+    return custom_response({'info': 'No se encontraron negocios en el perímetro'}, 404)
   
   return custom_response(stores, 200)
 
