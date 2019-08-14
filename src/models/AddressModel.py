@@ -13,7 +13,7 @@ class AddressModel(db.Model):
   __tablename__ = 'addresses'
 
   id = db.Column(db.Integer, primary_key=True)
-  type_address = db.Column(db.String(128), nullable=False)  # CASA / OFICINA / APARTAMENTO
+  type_address = db.Column(db.String(128))  # CASA / OFICINA / APARTAMENTO
   address = db.Column(db.String(128), nullable=False)
   phone = db.Column(db.Integer, nullable=False)
   user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -49,14 +49,15 @@ class AddressModel(db.Model):
   
   @staticmethod
   def get_one_address(id):
-    return AddressModel.query.get(id)
+    return AddressModel.query.filter(AddressModel.user == id).first()
+    # return AddressModel.query.get(id)
 
   def __repr__(self):
     return '<id {}>'.format(self.id)
 
 class AddressSchema(Schema):
   id = fields.Int(dump_only=True)
-  type_address = fields.Str(required=True)
+  type_address = fields.Str(required=False)
   address = fields.Str(required=True)
   phone = fields.Int(required=True)
   user = fields.Int(required=True)

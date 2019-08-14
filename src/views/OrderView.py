@@ -50,6 +50,18 @@ def get_all():
   data = order_schema.dump(orders, many=True).data
   return custom_response(data, 200)
 
+@order_api.route('/user', methods=['GET'])
+@Auth.auth_required
+def get_orders_user():
+  """
+  Get All orders by user
+  """
+  user = g.user.get('id')
+  print('user',user)
+  orders = OrderModel.get_orders_user(user)
+  data = order_schema.dump(orders, many=True).data
+  return custom_response(data, 200)
+
 @order_api.route('/<int:order_id>', methods=['GET'])
 def get_one(order_id):
   """

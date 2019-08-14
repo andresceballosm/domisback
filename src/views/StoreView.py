@@ -74,7 +74,6 @@ def get_all_storetype():
   city = req_data['city']
   location = req_data['location']
   lat = location['latitude']
-  print('lat',lat)
   lng = location['longitude']
   stores= []
   allStores = StoreModel.get_store_by_storetype(storetype,city)
@@ -86,6 +85,7 @@ def get_all_storetype():
 
   for store in data:
     distance = DistanceModel.distance_cal(lat,lng,store['latitude'],store['longitude'])
+    print('distante ===', distance)
     if store['license'] != False and store['active'] != False and distance <= store['perimeter']:
       stores.append(store)
 

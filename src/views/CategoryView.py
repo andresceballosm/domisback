@@ -51,7 +51,7 @@ def get_by_store(store_id):
   """
   categories = CategoryModel.get_categories_by_store(store_id)
   if not categories:
-    return custom_response({'error': 'No se encontraron categorias para este negocio.'}, 404)
+    return custom_response({'info': 'No se encontraron categorias para este negocio.'}, 404)
   data = category_schema.dump(categories, many=True).data
   return custom_response(data, 200)
 

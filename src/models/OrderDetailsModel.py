@@ -50,6 +50,7 @@ class OrderDetailsModel(db.Model):
 
   @staticmethod
   def get_order_details(order_id):
+    print('order_id',order_id)
     return OrderDetailsModel.query.filter(OrderDetailsModel.order_id == order_id).all()
   
   @staticmethod

@@ -89,6 +89,7 @@ def get_order_details(order_id):
   Get details by order_id
   """
   orderDetails = OrderDetailsModel.get_order_details(order_id)
+  print('orderDetails',orderDetails)
   if not orderDetails:
     return custom_response({'error': 'order detail not found'}, 404)
   data = orderDetails_schema.dump(orderDetails, many=True).data
